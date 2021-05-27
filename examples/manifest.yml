@@ -1,0 +1,134 @@
+# ppms group config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myapp
+data:
+  key: value
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      name: myapp
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: nginx:latest
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 123
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 123
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 10
+          ports:
+            - containerPort: 123
+            - containerPort: 456
+            - containerPort: 789
+          imagePullPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: myapp
+  name: myapp01
+spec:
+  type: NodePort
+  ports:
+    - name: myapp01
+      port: 123
+      targetPort: 123
+  selector:
+    app: myapp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: myapp
+  name: myapp02
+spec:
+  type: NodePort
+  ports:
+    - name: myapp02
+      port: 456
+      targetPort: 456
+  selector:
+    app: myapp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: myapp
+  name: myapp03
+spec:
+  type: NodePort
+  ports:
+    - name: myapp03
+      port: 789
+      targetPort: 789
+  selector:
+    app: myapp  
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myapp01
+spec:
+  rules:
+    - host: myapp01.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: myapp
+              servicePort: 1
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myapp02
+spec:
+  rules:
+    - host: myapp02.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: myapp
+              servicePort: 2
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myapp03
+spec:
+  rules:
+    - host: myapp03.example.com
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: myapp
+              servicePort: 3                            

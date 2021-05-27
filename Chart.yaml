@@ -1,0 +1,5 @@
+apiVersion: v2
+name: batch-manifests-update
+type: application
+version: 0.0.1
+description: People who play fire, will be burned by the fire.

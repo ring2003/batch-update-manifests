@@ -1,0 +1,13 @@
+manifest: examples/manifest.yml
+deploys:
+- name: myapp
+ingress:
+- name: myapp01
+  serviceName: myapp
+  servicePort: 123
+- name: myapp02
+  serviceName: myapp
+  servicePort: 456
+- name: myapp03
+  serviceName: myapp
+  servicePort: 789  

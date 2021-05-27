@@ -1,0 +1,141 @@
+apiVersion: v1
+data:
+  key: value
+kind: ConfigMap
+metadata:
+  name: myapp
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: myapp
+  name: myapp01
+spec:
+  ports:
+  - name: myapp01
+    port: 123
+    targetPort: 123
+  selector:
+    app: myapp
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: myapp
+  name: myapp02
+spec:
+  ports:
+  - name: myapp02
+    port: 456
+    targetPort: 456
+  selector:
+    app: myapp
+  type: NodePort
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    name: myapp
+  name: myapp03
+spec:
+  ports:
+  - name: myapp03
+    port: 789
+    targetPort: 789
+  selector:
+    app: myapp
+  type: NodePort
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+      name: myapp
+    spec:
+      containers:
+      - image: nginx:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /health
+            port: 123
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+        name: myapp
+        ports:
+        - containerPort: 123
+        - containerPort: 456
+        - containerPort: 789
+        readinessProbe:
+          failureThreshold: 10
+          httpGet:
+            path: /health
+            port: 123
+          initialDelaySeconds: 60
+          periodSeconds: 10
+          timeoutSeconds: 10
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp01
+spec:
+  rules:
+  - host: myapp01.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: myapp
+            port:
+              number: 1
+        path: /
+        pathType: ImplementationSpecific
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp02
+spec:
+  rules:
+  - host: myapp02.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: myapp
+            port:
+              number: 2
+        path: /
+        pathType: ImplementationSpecific
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: myapp03
+spec:
+  rules:
+  - host: myapp03.example.com
+    http:
+      paths:
+      - backend:
+          service:
+            name: myapp
+            port:
+              number: 3
+        path: /
+        pathType: ImplementationSpecific

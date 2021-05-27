@@ -1,0 +1,34 @@
+kind: Kustomization
+
+resources:
+  - {{ .Values.manifest }}
+
+patches:
+{{- range .Values.deploys }}
+  - target:
+      kind: Deployment
+      name: {{ .name }}
+    patch: |-
+      - op: replace
+        path: /apiVersion
+        value: apps/v1
+{{- end }}
+{{- range .Values.ingress }}
+  - target:
+      kind: Ingress
+      name: {{ .name }}
+    patch: |-
+      - op: replace
+        path: /apiVersion
+        value: networking.k8s.io/v1
+      - op: replace
+        path: /spec/rules/0/http/paths/0
+        value:
+          path: /
+          pathType: ImplementationSpecific
+          backend:
+            service:
+              name: {{ .serviceName }}
+              port:
+                number: {{ .servicePort }}
+{{- end }}
